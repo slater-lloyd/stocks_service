@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package stocks;
+
+option go_package = "stocks/";
+
+service StocksService {
+  rpc GetLastPrice(StockSymbolMessage) returns (StockPriceMessage) {}
+  rpc GetPriceAtDate(PriceAtDateMessage) returns (StockPriceMessage) {}
+}
+
+message StockSymbolMessage {
+  string symbol = 1;
+}
+
+message StockPriceMessage {
+  float price = 1;
+}
+
+message PriceAtDateMessage {
+  string symbol = 1;
+  string date = 2;
+}
