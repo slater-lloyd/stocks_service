@@ -3,8 +3,19 @@ package stocks
 import (
 	"context"
 	"log"
+	"os"
 	ad "stocks_service/alphaAdapter"
+
+	"github.com/joho/godotenv"
 )
+
+func getAPIKey() string {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+	return os.Getenv("API_KEY")
+}
 
 type Server struct {
 	UnimplementedStocksServiceServer
@@ -13,7 +24,7 @@ type Server struct {
 func (s *Server) GetLastPrice(ctx context.Context, message *StockSymbolMessage) (*StockPriceMessage, error) {
 	log.Printf("Recieved request for code: %s\n", message.Symbol)
 
-	API_KEY := "WAR2QUKV9B5KY2S2"
+	API_KEY := getAPIKey()
 	adapter := ad.AlphaAdapter{API_KEY: API_KEY}
 	resp, err := adapter.GetLastPrice(message.Symbol)
 	if err != nil {
@@ -25,7 +36,7 @@ func (s *Server) GetLastPrice(ctx context.Context, message *StockSymbolMessage) 
 func (s *Server) GetPriceAtDate(ctx context.Context, message *PriceAtDateMessage) (*StockPriceMessage, error) {
 	log.Printf("Recieved request for code: %s at date: %s\n", message.Symbol, message.Date)
 
-	API_KEY := "WAR2QUKV9B5KY2S2"
+	API_KEY := getAPIKey()
 	adapter := ad.AlphaAdapter{API_KEY: API_KEY}
 	resp, err := adapter.GetPriceAtDate(message.Symbol, message.Date)
 	if err != nil {
