@@ -50,7 +50,20 @@ func (sc *StockClient) GetPriceAtDate(code string, date string, ctx *context.Con
 		return nil, err
 	}
 
-	res, err := stockClient.GetPriceAtDate(*ctx, &pb.PriceAtDateMessage{Symbol: code, Date: date})
+	res, err := stockClient.GetPriceAtDate(*ctx, &pb.SymbolAtDateMessage{Symbol: code, Date: date})
+	if err != nil {
+		log.Fatalf("Error in client response: %v", err)
+	}
+
+	return &res.Price, nil
+}
+
+func (sc *StockClient) GetPercentChangeAtDate(code string, date string, ctx *context.Context) (*float32, error) {
+	if err := prepareStockClient(ctx); err != nil {
+		return nil, err
+	}
+
+	res, err := stockClient.GetPercentChangeAtDate(*ctx, &pb.SymbolAtDateMessage{Symbol: code, Date: date})
 	if err != nil {
 		log.Fatalf("Error in client response: %v", err)
 	}

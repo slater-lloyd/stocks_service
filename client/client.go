@@ -13,8 +13,8 @@ func main() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 
-	code := "JNJ"
-	date := "2023-10-17"
+	code := "IBM"
+	date := "2023-06-14"
 
 	res, err := stock_client.GetLastPrice(code, &ctx)
 	if err != nil {
@@ -27,6 +27,12 @@ func main() {
 		log.Fatalf("Error in response: %v", err)
 	}
 	log.Printf("Recieved price from server for code %s on date %s: $%f", code, date, *res)
+
+	res, err = stock_client.GetPercentChangeAtDate(code, date, &ctx)
+	if err != nil {
+		log.Fatalf("Error in response: %v", err)
+	}
+	log.Printf("Recieved percent change from server for code %s on date %s: %%%f", code, date, *res)
 
 	defer cancel()
 }

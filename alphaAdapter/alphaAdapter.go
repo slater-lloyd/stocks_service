@@ -82,6 +82,27 @@ func (a *AlphaAdapter) GetPriceAtDate(sym string, date string) (float32, error) 
 	return float32(flVal), nil
 }
 
+func (a *AlphaAdapter) GetPercentChangeAtDate(sym string, date string) (float32, error) {
+	tsd, err := a.GetTimeSeriesDaily(sym)
+	if err != nil {
+		log.Fatalf("Error: %v", err)
+	}
+
+	ts := *tsd.TimeSeries
+	closeStrVal := ts[date].Close()
+	openStrVal := ts[date].Open()
+
+	closeFlVal, err := strconv.ParseFloat(closeStrVal, 32)
+	openFlVal, err := strconv.ParseFloat(openStrVal, 32)
+
+	if err != nil {
+		log.Fatalf("Error in response: %v", err)
+	}
+
+	flVal := closeFlVal / openFlVal
+	return float32(flVal), nil
+}
+
 func buildTimeSeriesData(metaData, timeSeries string) (*TimeSeriesData, error) {
 
 	var meta MetaData

@@ -23,7 +23,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type StocksServiceClient interface {
 	GetLastPrice(ctx context.Context, in *StockSymbolMessage, opts ...grpc.CallOption) (*StockPriceMessage, error)
-	GetPriceAtDate(ctx context.Context, in *PriceAtDateMessage, opts ...grpc.CallOption) (*StockPriceMessage, error)
+	GetPriceAtDate(ctx context.Context, in *SymbolAtDateMessage, opts ...grpc.CallOption) (*StockPriceMessage, error)
+	GetPercentChangeAtDate(ctx context.Context, in *SymbolAtDateMessage, opts ...grpc.CallOption) (*StockPriceMessage, error)
 }
 
 type stocksServiceClient struct {
@@ -43,9 +44,18 @@ func (c *stocksServiceClient) GetLastPrice(ctx context.Context, in *StockSymbolM
 	return out, nil
 }
 
-func (c *stocksServiceClient) GetPriceAtDate(ctx context.Context, in *PriceAtDateMessage, opts ...grpc.CallOption) (*StockPriceMessage, error) {
+func (c *stocksServiceClient) GetPriceAtDate(ctx context.Context, in *SymbolAtDateMessage, opts ...grpc.CallOption) (*StockPriceMessage, error) {
 	out := new(StockPriceMessage)
 	err := c.cc.Invoke(ctx, "/stocks.StocksService/GetPriceAtDate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *stocksServiceClient) GetPercentChangeAtDate(ctx context.Context, in *SymbolAtDateMessage, opts ...grpc.CallOption) (*StockPriceMessage, error) {
+	out := new(StockPriceMessage)
+	err := c.cc.Invoke(ctx, "/stocks.StocksService/GetPercentChangeAtDate", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +67,8 @@ func (c *stocksServiceClient) GetPriceAtDate(ctx context.Context, in *PriceAtDat
 // for forward compatibility
 type StocksServiceServer interface {
 	GetLastPrice(context.Context, *StockSymbolMessage) (*StockPriceMessage, error)
-	GetPriceAtDate(context.Context, *PriceAtDateMessage) (*StockPriceMessage, error)
+	GetPriceAtDate(context.Context, *SymbolAtDateMessage) (*StockPriceMessage, error)
+	GetPercentChangeAtDate(context.Context, *SymbolAtDateMessage) (*StockPriceMessage, error)
 	mustEmbedUnimplementedStocksServiceServer()
 }
 
@@ -68,8 +79,11 @@ type UnimplementedStocksServiceServer struct {
 func (UnimplementedStocksServiceServer) GetLastPrice(context.Context, *StockSymbolMessage) (*StockPriceMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetLastPrice not implemented")
 }
-func (UnimplementedStocksServiceServer) GetPriceAtDate(context.Context, *PriceAtDateMessage) (*StockPriceMessage, error) {
+func (UnimplementedStocksServiceServer) GetPriceAtDate(context.Context, *SymbolAtDateMessage) (*StockPriceMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPriceAtDate not implemented")
+}
+func (UnimplementedStocksServiceServer) GetPercentChangeAtDate(context.Context, *SymbolAtDateMessage) (*StockPriceMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPercentChangeAtDate not implemented")
 }
 func (UnimplementedStocksServiceServer) mustEmbedUnimplementedStocksServiceServer() {}
 
@@ -103,7 +117,7 @@ func _StocksService_GetLastPrice_Handler(srv interface{}, ctx context.Context, d
 }
 
 func _StocksService_GetPriceAtDate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PriceAtDateMessage)
+	in := new(SymbolAtDateMessage)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -115,7 +129,25 @@ func _StocksService_GetPriceAtDate_Handler(srv interface{}, ctx context.Context,
 		FullMethod: "/stocks.StocksService/GetPriceAtDate",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StocksServiceServer).GetPriceAtDate(ctx, req.(*PriceAtDateMessage))
+		return srv.(StocksServiceServer).GetPriceAtDate(ctx, req.(*SymbolAtDateMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StocksService_GetPercentChangeAtDate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SymbolAtDateMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StocksServiceServer).GetPercentChangeAtDate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/stocks.StocksService/GetPercentChangeAtDate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StocksServiceServer).GetPercentChangeAtDate(ctx, req.(*SymbolAtDateMessage))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -134,6 +166,10 @@ var StocksService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetPriceAtDate",
 			Handler:    _StocksService_GetPriceAtDate_Handler,
+		},
+		{
+			MethodName: "GetPercentChangeAtDate",
+			Handler:    _StocksService_GetPercentChangeAtDate_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

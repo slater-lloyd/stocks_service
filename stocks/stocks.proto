@@ -6,7 +6,8 @@ option go_package = "stocks/";
 
 service StocksService {
   rpc GetLastPrice(StockSymbolMessage) returns (StockPriceMessage) {}
-  rpc GetPriceAtDate(PriceAtDateMessage) returns (StockPriceMessage) {}
+  rpc GetPriceAtDate(SymbolAtDateMessage) returns (StockPriceMessage) {}
+  rpc GetPercentChangeAtDate(SymbolAtDateMessage) returns (StockPriceMessage) {}
 }
 
 message StockSymbolMessage {
@@ -17,7 +18,7 @@ message StockPriceMessage {
   float price = 1;
 }
 
-message PriceAtDateMessage {
+message SymbolAtDateMessage {
   string symbol = 1;
   string date = 2;
 }
